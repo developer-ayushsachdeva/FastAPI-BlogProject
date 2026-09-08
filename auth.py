@@ -2,8 +2,12 @@ from jose import jwt  # pyright: ignore[reportMissingModuleSource]
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer,HTTPAuthorizationCredentials
+import os
+from dotenv import load_dotenv
 
-Secret_key = "my_secret_key"  # Replace with your own secret
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -14,7 +18,7 @@ def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, Secret_key, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def verify_access_token(
     credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)
@@ -24,7 +28,7 @@ def verify_access_token(
     try:
         payload = jwt.decode(
             token,
-            Secret_key,
+            SECRET_KEY,
             algorithms=[ALGORITHM]
         )
         return payload
